@@ -1,0 +1,91 @@
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="DEBUG">
+    <title>XHR termina logs</title>
+  </head>
+  <style>
+    html, body {
+      padding: 0px; margin: 0px;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+
+  <body id="thebody"> <!-- onload="repeat()" -->
+
+  <p>
+    Watch your console .. and your remote terminal ;P
+  </p>
+  <input type="button" id="repeatBtn" onclick="sendLog()" value="sen log !"></input>
+
+  <script type="text/javascript">
+    // quick & dirty helper
+    function print(string){ console.log( string ); }
+
+    var serverIp = '192.168.1.8'; // server running whatever: php, bash, nodejs, ..
+    var serverPort = 3000;
+
+    function terminalog( string ){
+      var xhr = new XMLHttpRequest();
+      xhr.open( 'GET', 'http://' + serverIp + ':' + serverPort + "?iOS-message=" + btoa( unescape( encodeURIComponent(string) ) ), true);
+      xhr.overrideMimeType('text/plain; charset=UTF8; base64'); // not sure about this .. ubt seems fine
+      //xhr.setRequestHeader("Cache-Control", "no-cache"); // Request header field Cache-Control is not allowed by Access-Control-Allow-Headers.
+      xhr.send(null); // encode the content
+      xhr.onreadystatechange = function(){
+        if( xhr.readyState == 4 && xhr.status == 200 ){
+          //print('xhr sent ! => responseText:' + xhr.responseText ); // tied to an alert() call
+          //console.log( '=> responseText: ' + xhr.responseText );
+          //console.log( '=> response: ' + xhr.response );
+          //console.log('=> decoded:' + decodeURIComponent( escape( atob( xhr.responseText ) ) ) ); // where are my linefeeds ?!
+          console.log( decodeURIComponent( escape( atob( xhr.responseText ) ) ).replace(/\\n/g, '\n') ); // whatever .. :S
+          // TODO: handle the presence of %s & generate consolg.log colorizing => SEE NOTES ON PAPER !
+          var myStr2 = decodeURIComponent( escape( atob( xhr.responseText ) ) ).replace(/\\n/g, '\n');
+          var styles = myStr2.match(/%s\[([^\]]+)\]/gm); // or myStr2.match(/%s\[[^\]]+\]/gm); since we don't use capture groups with 'match()'
+         styles; // ["%s[color: #FE524C]", "%s[color: #050504]"]
+         //styles[0].substr(3, styles[0].length -4) // "color: #FE524C"
+         styles.forEach(function(item, index){ styles[index] = styles[index].substr(3, styles[index].length -4) }); // clean the styles array items
+         var myStrClean = myStr2.replace(/%s\[[^\]]+\]/gm, '%c'); // clean the log string from its styles
+         styles.unshift( myStrClean ); // prepare the console.log call to which we'll pass an array of elements
+         console.log.apply(console, styles); // log all that stuff
+        }
+      }
+    }
+
+    function sendLog(){
+      terminalog('\033[31m'+ 'iOT' +' \033[0msays Hi to \n...\n'+ 'Julie');
+      console.log('\033[31m'+ 'iOT' +' \033[0msays Hi to \n...\n'+ 'Julie');
+    }
+
+    // a few times more ;)
+    var dudes = ['Thom', 'Tef', 'Antoine', 'Rocco', 'Yo', 'Rom', 'Patrick'];
+    var ladies = ['Kelly', 'Manon', 'Caro', 'Princesse Ely'];
+    var dude;
+    var lady;
+    var i = 0;
+    var timeout;
+    function repeat(){
+      print('Repeating ..'); // iOS debug 'cause xhr not triggered :/
+      if(i <= 10){
+        // generate randomized dumb content
+        dude = dudes[Math.floor(Math.random()* dudes.length)];
+        lady = ladies[Math.floor(Math.random()* ladies.length)];
+
+        // log something to the remote terminal
+        terminalog('\033[31m'+ dude +' \033[0msays Hi to \n...\n'+ lady); // working fine on desktop, ont yet on iOS
+        //print('\033[31m'+ dude +' \033[0msays Hi to \n...\n'+ lady); // iOS debug 'cause xhr not triggered :/
+
+        // repeat until 10 executions
+        i++;
+        //timeout = setTimeout(function(){ repeat(); }, 1000) // stress-test it to see how fast we can log stuff
+        timeout = setTimeout(function(){ repeat(); }, 100)
+      }
+      else clearTimeout( timeout );
+    }
+    repeat(); // init the repeat ;) - seems not being triggered on iOS ?!
+
+  </script>
+</body>
+</html>
