@@ -20,7 +20,7 @@ as we use quick n' dirty XHRs, we're totally tech agnostic here, hence the 3 sma
 The PHP script is intended to be called using PHP's built-in server, to easily output to a terminal while still allowing the logs to be saved using a standard 'tee' command
 Also, the IP address passed to it must be using a wlan interface or the remote device won't be able to XHR
 ( although we could make use of iptables & Cie to bridge/route localhost to it, I don't know yet if we can pass multiple interface to PHP's built-in server )
-```
+```bash
 # run the server & log to the terminal
 php -S 192.168.1.8:3000 ./localServer.php
 # run the server & log to the terminal as well as to a file
@@ -29,14 +29,16 @@ php -S 192.168.1.8:3000 ~/Documents/xhrLogsToTerminal/localServer.php 2>&1 | tee
 ```
 
 The NodeJS script is 'bare metal' and only contains the essentials to build upon
-`nodejs ./localServer.js`
+```bash
+nodejs ./localServer.js
+```
 
 The Bash script is .. not yet written, but 'll get some code as soon as can be
 Nb: also, I'll have to digg how to handle GET/POST requests in pure Bash ;p .. & curl that
 
 using 'POST'
 ============
-```
+```javascript
 var xhr = new XMLHttpRequest();
 xhr.open( 'POST', 'http://' + serverIp + ':' + serverPort, true);
 xhr.overrideMimeType('text/plain; charset=UTF8; base64'); // not sure about this ..
@@ -45,7 +47,7 @@ xhr.send( btoa( unescape( encodeURIComponent('\033[31m'+ 'iOP' +' \033[0msays Hi
 
 using 'GET'
 ============
-```
+```javascript
 var xhr = new XMLHttpRequest();
 xhr.open( 'GET', 'http://' + serverIp + ':' + serverPort + "?iOS-message=" + btoa( unescape( encodeURIComponent('\033[31m'+ 'iOG' +' \033[0msays Hi to \n...\n'+ 'Julie') ) ), true);
 xhr.overrideMimeType('text/plain; charset=UTF8; base64'); // not sure about this .. ubt seems fine
@@ -54,7 +56,7 @@ xhr.send(null); // content is encoded & in url params
 
 using 'script'
 ===============
-```
+```javascript
 var xhrScript = document.createElement('script'); // create a <script> tag
 xhrScript.id = 'xhr-script'; // give it an id
 xhrScript.type = 'text/javascript'; // set its type
@@ -69,7 +71,7 @@ example1:
 =========
 
 this snippet demonstrates the simplest usage
-```
+```javascript
 var serverIp = '192.168.1.8'; // server running whatever: php, bash, nodejs, ..
 var serverPort = 3000;
 function terminalog( string ){
@@ -82,7 +84,7 @@ function terminalog( string ){
 example2:
 =========
 this snippet encapsulates the above & also handles a callback log from the server
-```
+```javascript
 function terminalog( string ){
   var xhr = new XMLHttpRequest();
   xhr.open( 'GET', 'http://' + serverIp + ':' + serverPort + "?iOS-message=" + btoa( unescape( encodeURIComponent(string) ) ), true);
@@ -107,7 +109,7 @@ function terminalog( string ){
 example3:
 =========
 this snippet provides a simple solution to lower the XHR calls by deffering the calls & buffering the logs
-```
+```javascript
 var serverIp = '192.168.1.8';
 var serverPort = 3000;
 var lastCallTime = new Date().getTime();
