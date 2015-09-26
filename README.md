@@ -17,6 +17,7 @@ server-side
 ===========
 as we use quick n' dirty XHRs, we're totally tech agnostic here, hence the 3 small examples in PHP, NodeJS, & Bash
 
+## PHP:
 The PHP script is intended to be called using PHP's built-in server, to easily output to a terminal while still allowing the logs to be saved using a standard 'tee' command
 Also, the IP address passed to it must be using a wlan interface or the remote device won't be able to XHR
 ( although we could make use of iptables & Cie to bridge/route localhost to it, I don't know yet if we can pass multiple interface to PHP's built-in server )
@@ -28,16 +29,47 @@ php -S 192.168.1.8:3000 ~/Documents/xhrLogsToTerminal/localServer.php 2>&1 | tee
 
 ```
 
+## NodeJS:
 The NodeJS script is 'bare metal' and only contains the essentials to build upon
 ```bash
 nodejs ./localServer.js
 ```
 
-The Bash script is .. not yet written, but 'll get some code as soon as can be
-Nb: also, I'll have to digg how to handle GET/POST requests in pure Bash ;p .. & curl that
+## Bash:
+The Bash script, while rather hacky, gets most of the job done, but has currently a 'half dynamic' response.
+```bash
+./localServer.sh
+```
+In other words, it misses some nc mumbo-jumbo tricks [& some fifo ?] to respond after parsing stuff, see for yourself :/ ;p
+```bash
+# ( .. )
 
-using 'POST'
-============
+echo -e "HTTP/1.1 200 OK\n"\
+"Content-type: text/html\n\n"\
+"$(echo 'DATA FROM SERVER: \n'\
+        'Hello World from the localServer [Bash] !'\
+        '%s[color: #FE524C]INFOS:%s[color: #050504] from the localServer =>' "${dudeName}" 'welcomed' "$ladyName" '[Bash]'\
+  | base64)" \
+      | nc -l -p 3000 \
+        | head -1 \
+          | while read -a lines
+            do
+              # LOG DATA TO SERVER TERMINAL
+              echo -e "\n\nDATA FROM CLIENT:"
+              echo ${lines[1]:14} | base64 -d;
+              # TODO: parse the dude & lady names, display that as client infos, and write to a fifo that inputs to nc in order to
+              echo;
+            done;
+
+# ( .. )
+```
+Nb: also, I'll have to digg how to handle GET/POST requests in pure Bash ;p .. & curl that
+Nb2: talking about 'curl', the following are very handy
+
+client-side
+===========
+
+##using 'POST'
 ```javascript
 var xhr = new XMLHttpRequest();
 xhr.open( 'POST', 'http://' + serverIp + ':' + serverPort, true);
@@ -45,8 +77,7 @@ xhr.overrideMimeType('text/plain; charset=UTF8; base64'); // not sure about this
 xhr.send( btoa( unescape( encodeURIComponent('\033[31m'+ 'iOP' +' \033[0msays Hi to \n...\n'+ 'Julie') ) ) ); // encode the content
 ```
 
-using 'GET'
-============
+##using 'GET'
 ```javascript
 var xhr = new XMLHttpRequest();
 xhr.open( 'GET', 'http://' + serverIp + ':' + serverPort + "?iOS-message=" + btoa( unescape( encodeURIComponent('\033[31m'+ 'iOG' +' \033[0msays Hi to \n...\n'+ 'Julie') ) ), true);
@@ -54,8 +85,7 @@ xhr.overrideMimeType('text/plain; charset=UTF8; base64'); // not sure about this
 xhr.send(null); // content is encoded & in url params
 ```
 
-using 'script'
-===============
+##using 'script'
 ```javascript
 var xhrScript = document.createElement('script'); // create a <script> tag
 xhrScript.id = 'xhr-script'; // give it an id
@@ -67,9 +97,7 @@ document.getElementsByTagName("head")[0].removeChild(xhrScript); // remove it fr
 delete xhrScript; // delete it (> digg the pros/cons (..) )
 ```
 
-example1:
-=========
-
+##example1:
 this snippet demonstrates the simplest usage
 ```javascript
 var serverIp = '192.168.1.8'; // server running whatever: php, bash, nodejs, ..
@@ -81,8 +109,8 @@ function terminalog( string ){
   xhr.send(null); // encode the content
 }
 ```
-example2:
-=========
+
+##example2:
 this snippet encapsulates the above & also handles a callback log from the server
 ```javascript
 function terminalog( string ){
@@ -106,8 +134,7 @@ function terminalog( string ){
 }
 ```
 
-example3:
-=========
+##example3:
 this snippet provides a simple solution to lower the XHR calls by deffering the calls & buffering the logs
 ```javascript
 var serverIp = '192.168.1.8';
