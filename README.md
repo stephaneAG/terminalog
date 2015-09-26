@@ -5,6 +5,7 @@
 <img src="http://stephaneadamgarnier.com/iOS_remoteTerminal/assets/computer.png" align="" height="48" width="48">
 
 # Terminalog
+<img src="http://stephaneadamgarnier.com/iOS_remoteTerminal/assets/iOS_terminalog.png" align="" height="" width="100%">
 Quick log to a remote terminal ( handy for debugging code on smartphones &amp; tablets )
 
 the idea behind the smallest version of the script is to use XHRs as debugging tool instead of the traditional call to 'console.log()', while logs can be displayed directly in the remote terminal as well as saved to a (log)file
