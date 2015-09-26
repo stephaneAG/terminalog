@@ -46,6 +46,7 @@ In other words, it misses some nc mumbo-jumbo tricks [& some fifo ?] to respond 
 # ( .. )
 
 echo -e "HTTP/1.1 200 OK\n"\
+"Access-Control-Allow-Origin: *\n"\
 "Content-type: text/html\n\n"\
 "$(echo 'DATA FROM SERVER: \n'\
         'Hello World from the localServer [Bash] !'\
@@ -58,7 +59,7 @@ echo -e "HTTP/1.1 200 OK\n"\
               # LOG DATA TO SERVER TERMINAL
               echo -e "\n\nDATA FROM CLIENT:"
               echo ${lines[1]:14} | base64 -d;
-              # TODO: parse the dude & lady names, display that as client infos, and write to a fifo that inputs to nc in order to
+              # TODO: parse the dude & lady names, display that as client infos, and write to a fifo that inputs to nc in order to respond dynamic stuff
               echo;
             done;
 
