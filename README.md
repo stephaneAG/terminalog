@@ -67,6 +67,12 @@ echo -e "HTTP/1.1 200 OK\n"\
 ```
 Nb: also, I'll have to digg how to handle GET/POST requests in pure Bash ;p .. & curl that
 Nb2: talking about 'curl', the following are very handy
+```bash
+curl -D 192.168.1.8:3000
+curl --trace - 192.168.1.8:3000
+curl --trace-ascii - 192.168.1.8:3000
+-D - 192.168.1.8:3000
+```
 
 client-side
 ===========
