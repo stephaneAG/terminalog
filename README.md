@@ -37,11 +37,13 @@ nodejs ./localServer.js
 ```
 
 ## Bash:
-The Bash script, while rather hacky, gets most of the job done, but has currently a 'half dynamic' response.
+The Bash script, while rather hacky, gets most of the job done, ~~but has currently a 'half dynamic' response~~.
 ```bash
 ./localServer.sh
 ```
-In other words, it misses some nc mumbo-jumbo tricks [& some fifo ?] to respond after parsing stuff, see for yourself :/ ;p
+~~In other words, it misses some nc mumbo-jumbo tricks [& some fifo ?] to respond after parsing stuff~~ It now handles stuff using backpipes fifo redirections, is able to build the response dynamically, and 'll later handle POST reqs as well -> see for yourself :/ ;p
+
+[ old code ]
 ```bash
 # ( .. )
 
@@ -65,6 +67,12 @@ echo -e "HTTP/1.1 200 OK\n"\
 
 # ( .. )
 ```
+[ mumbo-jumbo hackety trick ]
+```bash
+while true; do nc -l 3000 < servicePipe | head -1 | ./localServer2.sh placeholderArg 1> servicePipe; done
+```
+Also, the code demonstrates a neat way to encapsulate 2 behaviors using a dummy args hack, to avoid us to type the above line to execute the script while still having just one file  
+
 Nb: also, I'll have to digg how to handle GET/POST requests in pure Bash ;p .. & curl that
 Nb2: talking about 'curl', the following are very handy
 ```bash
