@@ -80,6 +80,12 @@ curl -D 192.168.1.8:3000
 curl --trace - 192.168.1.8:3000
 curl --trace-ascii - 192.168.1.8:3000
 -D - 192.168.1.8:3000
+
+# ex: if we were to mimick client-side GET/POST requests
+# GET
+curl -D - 127.0.0.1:3000/?iOS-message=$(echo "PopcornLol" | base64)
+# POST
+curl -D - --data "$(echo "PopcornLol" | base64)" 127.0.0.1:3000
 ```
 
 client-side
