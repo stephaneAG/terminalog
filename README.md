@@ -71,7 +71,24 @@ echo -e "HTTP/1.1 200 OK\n"\
 ```bash
 while true; do nc -l 3000 < servicePipe | head -1 | ./localServer2.sh placeholderArg 1> servicePipe; done
 ```
-Also, the code demonstrates a neat way to encapsulate 2 behaviors using a dummy args hack, to avoid us to type the above line to execute the script while still having just one file  
+Also, the code demonstrates a neat way to encapsulate 2 behaviors using a dummy args hack, to avoid us to type the above line to execute the script while still having just one file 
+
+[ UPDATE ]
+While it's cool to know we can do the above 'dummy args hack for one file', we could also simply use a fcn in the same file ..
+Concerning the 'head -<x>' replacement, I gotta finish my tests, but it may be done as easily as something like
+```bash
+# working logic example
+echo -e "hello world\nTEF\nscrewed me up!" | { contentRead=$(while read -t 1 line; do echo "$line";
+# TO BE TESTED !
+... nc < servicePipe | { contentRead=$(while read -t 1 line; do echo "$line"; done); echo "$contentRead"; ... } > servicePipe
+```
+See 'localServerBashTests/test2.sh' for an interesting behavior that differs from test1.sh: it doesn't uses -t parameter in read but insted a "quick timestamp hack" to stop filling the buffer with input(s)
+```bash
+# ( .. )
+if [ ! $(getTimestamp) -lt $(( $callTime + $timeout )) ]; then break; fi
+    echo "$line"
+# ( .. )
+```
 
 Nb: also, I'll have to digg how to handle GET/POST requests in pure Bash ;p .. & curl that
 Nb2: talking about 'curl', the following are very handy
